@@ -1,0 +1,26 @@
+{
+  "development": {
+    "username": "postgres",
+    "password": "Algor1sm",
+    "database": "nautic-platform",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "test": {
+    "username": "postgres",
+    "password": null,
+    "database": "attir-app",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "production": {
+    "username": "crxtvimjxcfngm",
+    "password": "4c549410970ff46effaa033fd7c4fa44b353d3415a44ebf39908b8b5090562ad",
+    "database": "dcbh3q3i7jsbir",
+    "host": "ec2-54-228-251-254.eu-west-1.compute.amazonaws.com",
+    "dialect": "postgres",
+    "dialectOptions":{
+      "ssl":true
+    }
+  }
+}
