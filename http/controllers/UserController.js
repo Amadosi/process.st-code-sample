@@ -54,7 +54,7 @@ const login = async (req, res) => {
         return ErrorResponse(res, {message: 'unauthorised'}, 401);
 
     //if the user is not authorised return a 403
-    if(!user.preferences.confirmed)
+    if (!user.preferences.confirmed)
         return ErrorResponse(res, {message: 'account not verified'}, 403);
 
     const data = user.toJSON();
@@ -280,6 +280,59 @@ const verifyPhoneNumber = async (req, res) => {
                 return ErrorResponse(res, {message: response.error_text}, 400);
             }
         });
+    } else if (action === 'cancel') {
+        //get the request id
+        const {requestId} = req.body;
+
+        if (!requestId)
+            return ErrorResponse(res, {message: 'request_id required'}, 400);
+
+        nexmo.verify.control({request_id: requestId, cmd: 'cancel'}, async function (error, response) {
+
+            if (!response)
+                return ErrorResponse(res, {message: 'error while processing request'}, 500);
+
+            if (response.hasOwnProperty('status') && response.status === '0') {
+
+                return SuccessResponse(res, "verification request cancelled", response);
+            } else {
+                return ErrorResponse(res, {message: response.error_text}, 400);
+            }
+        });
+    } else if (action === 'resend') {
+        //first cancel the initial request
+        //get the request id
+        const {requestId} = req.body;
+
+        if (!requestId)
+            return ErrorResponse(res, {message: 'request_id required'}, 400);
+
+        nexmo.verify.control({request_id: requestId, cmd: 'cancel'}, async function (error, response) {
+
+            if (!response)
+                return ErrorResponse(res, {message: 'error while processing request'}, 500);
+
+            if (response.hasOwnProperty('status') && response.status === '0') {
+                //issue a new one
+                nexmo.verify.request({
+                    number: "234" + user.phoneNumber,
+                    brand: process.env.APP_NAME
+                }, function (error, response) {
+
+                    if (!response)
+                        return ErrorResponse(res, {message: 'error while processing request'}, 500);
+
+                    if (response.hasOwnProperty('status') && response.status === '0') {
+                        return SuccessResponse(res, "OTP sent", response);
+                    } else {
+                        return ErrorResponse(res, {message: response.error_text}, 400);
+                    }
+                });
+
+            } else {
+                return ErrorResponse(res, {message: response.error_text}, 400);
+            }
+        });
     } else {
         return ErrorResponse(res, {message: 'action field not specified'}, 400);
     }
@@ -293,19 +346,19 @@ const verifyEmail = async (req, res) => {
     //get the email
     const email = req.body.email;
 
-    if(!email)
+    if (!email)
         return ErrorResponse(res, 'Email field if required', 400);
 
     //get the user with that email
-    const [err,user] = await To(users.findOne({where:{email}}));
+    const [err, user] = await To(users.findOne({where: {email}}));
 
-    if(err)
-        return ErrorResponse(res,err,400);
+    if (err)
+        return ErrorResponse(res, err, 400);
 
-    if(!user)
+    if (!user)
         return ErrorResponse(res, "user not found", 404);
 
-    if(user.preferences.confirmed)
+    if (user.preferences.confirmed)
         return ErrorResponse(res, "account already verified", 403);
 
     //send verification email

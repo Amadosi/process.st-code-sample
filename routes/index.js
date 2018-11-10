@@ -5,14 +5,14 @@ module.exports = (app) => {
     // setup CORS
     app.use((req, res, next) => {
 
-        const allowedOrigins = ['http://localhost:3000/','https://www.nauticplatform.com'];
+        const allowedOrigins = ['http://localhost:3000','https://www.nauticplatform.com'];
 
-        const origin = req.headers.referer;
+        const origin = req.headers.referer || req.headers.origin;
 
         if(allowedOrigins.indexOf(origin) > -1){
             res.setHeader('Access-Control-Allow-Origin', origin);
         }else{
-            res.setHeader('Access-Control-Allow-Origin', 'https://www.nauticplatform.com');
+            res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
         }
 
         // Request methods you wish to allow
