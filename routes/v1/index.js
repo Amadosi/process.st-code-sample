@@ -20,7 +20,7 @@ router.post('/users/profile-photo', passport.authenticate('jwt', {session: false
 router.post('/users/verify-phone', passport.authenticate('jwt', {session: false}), UserController.verifyPhoneNumber);
 
 router.post('/businesses', passport.authenticate('jwt', {session: false}), BusinessController.create);
-router.get('/businesses');
+router.get('/businesses',passport.authenticate('jwt', {session: false}), BusinessController.get);
 router.get('/businesses/:id');
 
 module.exports = router;

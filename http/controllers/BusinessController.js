@@ -4,37 +4,44 @@ const {Business} = require("../../models");
  * function that handles the creating of
  * a business
  * */
-const create = async function(req, res){
+const create = async function (req, res) {
     //get the user and the business data
     const user = req.user;
     const body = req.body;
 
     //create the business
-    const [err, _business] = await To(Business.create({...body, user_id:user.id}));
+    const [err, _business] = await To(Business.findOrCreate({
+        where: {user_id: user.id},
+        defaults: {...body}
+    }).spread((business, created) => business));
 
-    if(err)
+    if (err)
         return ErrorResponse(res, err, 400);
 
     //return the newly created business
-    return SuccessResponse(res, _business.toJson());
+    return SuccessResponse(res, _business.toJSON());
 };
 
 /**
  * function to get a users business
  * */
-const get = async function (req, res){
+const get = async function (req, res) {
     //get the user
     const user = req.user;
-    const user_ref = req.query.user;
 
-    if(!user_ref)
-        return ErrorResponse(res, "user reference is required", 400);
+    //get the business of the user
+    let [err, business] = await To(Business.findOne({where: {user_id: user.id}}));
 
-    //check if the user is admin or is the actual user
-    if(user.reference !== user_ref && !user.isAdmin)
-        return ErrorResponse(res, "Not allowed to access", 400);
+    if (err)
+        return ErrorResponse(res, err, 400);
+
+    if (!business)
+        return ErrorResponse(res, "no business found", 404);
+
+    return SuccessResponse(res, "business fetched", business.toJSON());
 };
 
 module.exports = {
-  create
+    create,
+    get
 };

@@ -138,7 +138,7 @@ module.exports = (sequelize, DataTypes) => {
     };
 
 
-    User.prototype.toJson = () => this.toJson()
+    User.prototype.toJson = () => this.toJson();
     return User;
 }
 ;

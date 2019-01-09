@@ -1,6 +1,16 @@
 'use strict';
+const shortid = require("shortid");
+
 module.exports = (sequelize, DataTypes) => {
     const Business = sequelize.define('Business', {
+        reference: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            unique: true,
+            validate: {
+                notEmpty: true
+            }
+        },
         name: {
             type: DataTypes.STRING,
             allowNull: false,
@@ -34,5 +44,13 @@ module.exports = (sequelize, DataTypes) => {
             as: "user"
         });
     };
+
+    /** Auto generate a user reference
+     * before creation*/
+    Business.beforeCreate(async (business, option) => {
+        //generate a shortid reference
+        business.reference = shortid.generate();
+    });
+
     return Business;
 };
